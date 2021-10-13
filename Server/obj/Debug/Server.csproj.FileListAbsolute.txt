@@ -1,0 +1,7 @@
+C:\Users\Гульзада\source\repos\Exam\Server\bin\Debug\Server.exe.config
+C:\Users\Гульзада\source\repos\Exam\Server\bin\Debug\Server.exe
+C:\Users\Гульзада\source\repos\Exam\Server\bin\Debug\Server.pdb
+C:\Users\Гульзада\source\repos\Exam\Server\obj\Debug\Server.csproj.AssemblyReference.cache
+C:\Users\Гульзада\source\repos\Exam\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
+C:\Users\Гульзада\source\repos\Exam\Server\obj\Debug\Server.exe
+C:\Users\Гульзада\source\repos\Exam\Server\obj\Debug\Server.pdb

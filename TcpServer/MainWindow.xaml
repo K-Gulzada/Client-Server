@@ -1,0 +1,20 @@
+﻿<Window x:Class="TcpServer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TcpServer"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <ListBox HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="204" Margin="124,92,0,0"/>
+        <ListBox HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="101" Margin="365,92,0,0"/>
+        <Label Content="ip адресс" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="124,50,0,0" Height="37" Width="101"/>
+        <Label Content="порт" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="365,50,0,0" Height="37" Width="101"/>
+        <ListBox HorizontalAlignment="Left" Height="156" VerticalAlignment="Top" Width="463" Margin="125,149,0,0"/>
+        <Button Content="Уведомить клиентов" HorizontalAlignment="Left" VerticalAlignment="Top" Width="176" Margin="412,324,0,0" Height="38" Click="Button_Click"/>
+        <Label Content="тип вещания" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="487,50,0,0" Height="37" Width="101"/>
+        <Label Content="dropdown menu" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="487,87,0,0" Height="35" Width="101"/>
+
+    </Grid>
+</Window>
