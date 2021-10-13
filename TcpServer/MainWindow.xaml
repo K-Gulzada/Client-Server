@@ -3,18 +3,55 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+         xmlns:cm="clr-namespace:System.ComponentModel;assembly=System"
         xmlns:local="clr-namespace:TcpServer"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    <Window.Resources>
+        <cm:BackgroundWorker x:Key="backgroundWorker" WorkerSupportsCancellation="True" DoWork="backgroundWorker_DoWork"></cm:BackgroundWorker>
+        <Style x:Key="placeHolder" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <Grid>
+                            <TextBox Text="{Binding Path=Text,
+                                                RelativeSource={RelativeSource TemplatedParent}, 
+                                                Mode=TwoWay,
+                                                UpdateSourceTrigger=PropertyChanged}"
+                                 x:Name="textSource" 
+                                 Background="Transparent" 
+                                 Panel.ZIndex="2" />
+                            <TextBox Text="{TemplateBinding Tag}" Background="{TemplateBinding Background}" Panel.ZIndex="1">
+                                <TextBox.Style>
+                                    <Style TargetType="{x:Type TextBox}">
+                                        <Setter Property="Foreground" Value="Transparent"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=Text, Source={x:Reference textSource}}" Value="">
+                                                <Setter Property="Foreground" Value="LightGray"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid>
-        <ListBox HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="204" Margin="124,92,0,0"/>
-        <ListBox HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="101" Margin="365,92,0,0"/>
+        <ListBox HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="101" Margin="348,92,0,0"/>
         <Label Content="ip адресс" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="124,50,0,0" Height="37" Width="101"/>
-        <Label Content="порт" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="365,50,0,0" Height="37" Width="101"/>
-        <ListBox HorizontalAlignment="Left" Height="156" VerticalAlignment="Top" Width="463" Margin="125,149,0,0"/>
-        <Button Content="Уведомить клиентов" HorizontalAlignment="Left" VerticalAlignment="Top" Width="176" Margin="412,324,0,0" Height="38" Click="Button_Click"/>
-        <Label Content="тип вещания" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="487,50,0,0" Height="37" Width="101"/>
-        <Label Content="dropdown menu" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="487,87,0,0" Height="35" Width="101"/>
+        <Label Content="порт" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="348,50,0,0" Height="37" Width="101" RenderTransformOrigin="0.089,0.507"/>
+
+        
+
+        <TextBox Tag="google.com" x:Name="hostname" HorizontalAlignment="Left" Height="30" Margin="124,92,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="177"/>
+        <ListView x:Name="ReplyList" HorizontalAlignment="Left" Height="165" Margin="124,140,0,0" VerticalAlignment="Top" Width="464">
+
+        </ListView>
+        <Button x:Name="start" Content="Start" HorizontalAlignment="Left" Margin="474,92,0,0" VerticalAlignment="Top" Width="50" Height="24" Click="start_Click"/>
+        <Button x:Name="stop" Content="Stop" HorizontalAlignment="Left" Margin="538,92,0,0" VerticalAlignment="Top" Width="50" Height="24" Click="stop_Click" RenderTransformOrigin="-0.08,0.681"/>
 
     </Grid>
 </Window>

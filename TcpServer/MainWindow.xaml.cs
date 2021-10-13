@@ -22,150 +22,108 @@ namespace TcpServer
 {
     public partial class MainWindow : Window
     {
+        private BackgroundWorker backgroundWorker;
+        private List<ReplyStatus> replies = new List<ReplyStatus>();
+        private int port = 5001;
+
         public MainWindow()
         {
             InitializeComponent();
-            foreach (string resources in resources)
+            backgroundWorker = FindResource("backgroundWorker") as BackgroundWorker;
+
+            stop.IsEnabled = false;
+        }
+
+        private void start_Click(object sender, RoutedEventArgs e)
+        {
+
+            if (!string.IsNullOrWhiteSpace(hostname.Text))
             {
-                ResourceInput.Items.Add(resources);
+                backgroundWorker.RunWorkerAsync(hostname.Text);
+                start.IsEnabled = false;
+                stop.IsEnabled = true;
             }
         }
 
-        private string invalidIPAddressMessage = "Пожалуйста, введите корректный IP-адрес";
-
-        private IPAddress currentResource;
-
-        private List<StatusPresentation> presentations = new List<StatusPresentation>();
-
-        private string SuccessStatus = "o";
-
-        private string FailureStatus = "x";
-
-        private List<string> resources = new List<string>
+        private void stop_Click(object sender, RoutedEventArgs e)
         {
-        "google.com",
-        "nonexistent.nz"
-
-        };
-
-        public object UpdClient { get; private set; }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            /*currentResource = GetIpAddress();*/
-
-            if (GetHostname() != null)
-            {
-
-                BackgroundWorker worker = new BackgroundWorker();
-                worker.DoWork += Worker_DoWork;
-                worker.ProgressChanged += Worker_ProgressChanged;
-                worker.RunWorkerAsync();
-            }
-
+            stop.IsEnabled = false;
+            backgroundWorker.CancelAsync();
+            Thread.Sleep(5000);
+            start.IsEnabled = true;
         }
 
-        private void BroadcastToClients(string hostname)
+        private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-
-            int port = 5001;
-            Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-            /*IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, port);*/
-            IPEndPoint endPointBroadcast = new IPEndPoint(IPAddress.Broadcast, port);
-            /*string ip = "192.168.1.255";*/
-
-
-            string message = $"{hostname} is not working";
-            byte[] data = Encoding.UTF8.GetBytes(message);
-
-            client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
-
-            client.SendTo(data, endPointBroadcast);
-
-
-            client.Close();
-
-        }
-
-        private void Worker_DoWork(object sender, DoWorkEventArgs e)
-        {
-
             Ping ping = new Ping();
-            bool doesNotworkForAMinute = false;
-            string hostname = ResourceInput.Dispatcher.Invoke(() => ResourceInput.Text);
-
+            PingReply pingReply;
+            string hostname = e.Argument as string;
+            bool isUnavailable = false;
 
             while (true)
             {
-
+                if (backgroundWorker.CancellationPending)
+                {
+                    e.Cancel = true;
+                    return;
+                }
                 try
                 {
-                    PingReply pingResult = ping.Send(hostname);
+                    pingReply = ping.Send(hostname);
 
-                    presentations.Add(new StatusPresentation { Status = SuccessStatus, Resource = hostname });
-                    AccessibilityList.Dispatcher.Invoke(() => AccessibilityList.Items.Add(presentations.Last()));
+                    AddReply(hostname, pingReply.Status.ToString());
                     Thread.Sleep(5000);
                 }
-
-
-                catch (Exception)
+                catch (PingException)
                 {
-                    int index = 0;
-                    doesNotworkForAMinute = true;
-                    while (index < 12)
+                    isUnavailable = true;
+                    
+                    for (int i = 0; i < 12; i++)
                     {
-
                         try
                         {
-                            ping.Send(hostname);
-                            AccessibilityList.Dispatcher.Invoke(() => AccessibilityList.Items.Add(presentations.Last()));
-                            doesNotworkForAMinute = false;
-                            break;
-
+                            pingReply = ping.Send(hostname);
+                            AddReply(hostname, pingReply.Status.ToString());
+                            isUnavailable = false;
                         }
-                        catch (Exception)
+                        catch (PingException)
                         {
-                            presentations.Add(new StatusPresentation { Status = FailureStatus, Resource = hostname });
-                            AccessibilityList.Dispatcher.Invoke(() => AccessibilityList.Items.Add(presentations.Last()));
-
-                            index++;
+                            AddReply(hostname, "Failed");
                         }
                         Thread.Sleep(5000);
-
                     }
                 }
-                if (doesNotworkForAMinute)
+                if (isUnavailable)
                 {
-                    LogService.CreateLog(presentations.Last(), hostname);
-                    BroadcastToClients(hostname);
-
-
+                    SendNotification(hostname);
+                    backgroundWorker.CancelAsync();
                 }
             }
 
         }
 
-        private IPAddress GetIpAddress()
+        private void AddReply(string hostname, string status)
         {
-            try
-            {
-                return IPAddress.Parse(ResourceInput.Text);
-            }
-            catch (Exception)
-            {
-
-                return null;
-
-            }
-        }
-        private string GetHostname()
-        {
-            return ResourceInput.Text;
+            replies.Add(new ReplyStatus { Resource = hostname, Status = status });
+            ReplyList.Dispatcher.Invoke(() => ReplyList.Items.Add(replies.Last()));
         }
 
-       
+        private void SendNotification(string hostname)
+        {
+            IPEndPoint endPoint = new IPEndPoint(IPAddress.Broadcast, port);
+            using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
+
+                string msg = $"Resource {hostname} is currently unavailable";
+                byte[] byteMsg = Encoding.UTF8.GetBytes(msg);
+
+                client.SendTo(byteMsg, endPoint);
+            }
+        }
+
     }
+
 }
 
 

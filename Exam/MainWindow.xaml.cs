@@ -57,14 +57,8 @@ namespace Exam
                 IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, port);
 
                 server.Bind(endPoint);
-
-                /*  TcpClient client = new TcpClient("127.0.0.1", port);
-
-                  NetworkStream stream = client.GetStream();*/
-
                 byte[] data = new byte[1024];
-
-                //int bytes = stream.Read(data, 0, data.Length);
+                                
                 EndPoint endPoint_2 = endPoint;
                 int bytes = server.ReceiveFrom(data, ref endPoint_2);
                 responseData = Encoding.UTF8.GetString(data, 0, bytes);
@@ -75,9 +69,6 @@ namespace Exam
                 CreateLog(logMessage);
 
                 server.Close();
-
-                /* stream.Close();
-                 client.Close();*/
             }           
             catch (SocketException e)
             {
@@ -91,10 +82,9 @@ namespace Exam
         public void CreateLog(string logMessage)
         {
             try
-            {
-                string file_url = "/logs/log.txt";
-                
-                FileStream fs = new FileStream(file_url, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+            {                
+                string currentFilePath = Directory.GetCurrentDirectory() + "/logs.txt";
+                FileStream fs = new FileStream(currentFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
                                 
                 byte[] data = Encoding.UTF8.GetBytes(logMessage);
                 fs.Write(data, 0, data.Length);
